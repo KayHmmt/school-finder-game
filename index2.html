@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>志望校発見ゲーム</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f4f4f4;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #999;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background: #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+  <h1>東京・神奈川 中学受験 志望校発見ゲーム</h1>
+  <div id="game"></div>
+
+  <script>
+    const questions = [
+      "勉強が得意でチャレンジ精神がある？",
+      "将来は理系に進みたい？",
+      "英語を重視したい？",
+      "共学がいい？",
+      "女子校または男子校でもOK？",
+      "自由な校風が好き？",
+      "大学附属に興味がある？",
+      "部活・行事も重視したい？",
+      "都心へのアクセスが良い方がいい？",
+      "進学校志向（中高一貫で東大・医学部を目指す）？",
+      "宗教系でも問題ない？",
+      "制服はあった方がいい？",
+      "海外大学進学にも興味がある？",
+      "面倒見がよい学校を希望？",
+      "ICT教育（タブレットやプログラミング）を活用したい？",
+      "芸術（音楽・美術）に力を入れていると良い？",
+      "自然や農業体験などフィールドワークが豊富な学校が好き？",
+      "小規模校でアットホームな雰囲気がいい？",
+      "規律がしっかりしている学校が好き？",
+      "海外からの帰国生や外国籍生徒が多い方が良い？",
+      "自宅から60分以内で通いたい？",
+      "最新の設備（AI・VRなど）を使った教育に興味がある？",
+      "学習サポート（補習や個別指導）が手厚い方が良い？",
+      "大学実績よりも人間力育成を重視したい？",
+      "探究学習・プロジェクト型学習がある方が良い？",
+      "受験対策よりものびのびした環境を希望？",
+      "キャリア教育や職業体験がある学校がいい？",
+      "中学から部活動にしっかり参加したい？",
+      "地域との連携・社会貢献活動に参加したい？",
+      "1学年100人以下の少人数がいい？"
+    ];
+
+    let current = 0;
+    let answers = [];
+    const game = document.getElementById("game");
+
+    const schools = [
+      { name: "開成中学", tags: [0, 1, 9], area: "東京" },
+      { name: "桜蔭中学", tags: [0, 1, 9], area: "東京" },
+      { name: "麻布中学", tags: [0, 1, 9], area: "東京" },
+      { name: "広尾学園", tags: [2, 12, 19], area: "東京" },
+      { name: "三田国際", tags: [2, 12, 19], area: "東京" },
+      { name: "渋谷教育学園渋谷", tags: [2, 12, 19], area: "東京" },
+      { name: "和光中学", tags: [3, 5, 13, 24, 25], area: "東京" },
+      { name: "鷗友学園", tags: [3, 5, 13, 24, 25], area: "東京" },
+      { name: "国学院久我山", tags: [3, 5, 13], area: "東京" },
+      { name: "桐朋女子", tags: [15, 16], area: "東京" },
+      { name: "東京音大附属", tags: [15, 16], area: "東京" },
+      { name: "玉川学園", tags: [15, 16, 24], area: "東京" },
+      { name: "八雲学園", tags: [14, 22, 23, 26], area: "東京" },
+      { name: "成城学園", tags: [14, 22, 23], area: "東京" },
+      { name: "日本大学中学", tags: [14, 22], area: "神奈川" },
+      { name: "桐蔭学園", tags: [14, 23, 24], area: "神奈川" },
+      { name: "文教大学付属", tags: [21, 14, 23], area: "東京" },
+      { name: "東京都市大学付属", tags: [0, 1, 10], area: "東京" },
+      { name: "サレジオ学院", tags: [0, 1, 10], area: "神奈川" },
+      { name: "洗足学園", tags: [0, 1, 12, 15], area: "神奈川" }
+    ];
+
+    function showQuestion() {
+      if (current >= questions.length) {
+        showResult();
+        return;
+      }
+
+      game.innerHTML = `
+        <div class="question">
+          <h2>Q${current + 1}. ${questions[current]}</h2>
+          <button onclick="answer(1)">はい</button>
+          <button onclick="answer(0.5)">どちらでもない</button>
+          <button onclick="answer(0)">いいえ</button>
+        </div>
+      `;
+    }
+
+    function answer(val) {
+      answers.push(val);
+      current++;
+      showQuestion();
+    }
+
+    function showResult() {
+      const result = schools.map(school => {
+        let score = 0;
+        school.tags.forEach(tag => {
+          score += answers[tag];
+        });
+        return { name: school.name, score, max: school.tags.length };
+      });
+
+      result.sort((a, b) => b.score - a.score);
+      const top = result.slice(0, 15);
+
+      game.innerHTML = `<h2>あなたにオススメの学校マッチング一覧（上位15校）</h2>`;
+      game.innerHTML += `<table><tr><th>学校名</th><th>マッチ度</th></tr>`;
+      top.forEach(row => {
+        const percent = Math.round((row.score / row.max) * 100);
+        game.innerHTML += `<tr><td>${row.name}</td><td>${percent}%</td></tr>`;
+      });
+      game.innerHTML += `</table><button onclick='restart()'>もう一度やる</button>`;
+    }
+
+    function restart() {
+      current = 0;
+      answers = [];
+      showQuestion();
+    }
+
+    showQuestion();
+  </script>
+</body>
+</html>
