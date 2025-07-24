@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>志望校発見ゲーム</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f4f4f4;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+      overflow-x: auto;
+    }
+    th, td {
+      border: 1px solid #999;
+      padding: 8px;
+      text-align: center;
+      font-size: 14px;
+    }
+    th {
+      background: #e0e0e0;
+    }
+    button {
+      font-size: 16px;
+      margin: 5px;
+      padding: 8px 16px;
+    }
+    .question h2 {
+      font-size: 18px;
+    }
+    @media (max-width: 600px) {
+      th, td {
+        font-size: 12px;
+        padding: 6px;
+      }
+      button {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>東京・神奈川 中学受験 志望校発見ゲーム</h1>
+  <div id="game"></div>
+
+  <script>
+    const questions = [
+      // 質問リストがここに入ります
+    ];
+
+    let current = 0;
+    let answers = [];
+    const game = document.getElementById("game");
+
+    const schools = [
+      {
+        name: "開成中学",
+        url: "https://kaiseigakuen.jp",
+        偏差値: 75,
+        tags: [0,1,8],
+        features: "最難関男子校。自由な校風と東大合格実績が魅力。",
+        caution: "女子校希望や文系志向には向かないかもしれません。",
+        station: "西日暮里駅",
+        walk: "徒歩10分"
+      },
+      {
+        name: "広尾学園",
+        url: "https://www.hiroogakuen.ed.jp",
+        偏差値: 68,
+        tags: [2,11,18],
+        features: "先進的な国際教育とICT環境が充実した共学校。",
+        caution: "伝統的な学校や厳格な規律を好む方には合わないかもしれません。",
+        station: "広尾駅",
+        walk: "徒歩3分"
+      },
+      // 他の学校も同様に続ける
+    ];
+
+    function showQuestion() {
+      if (current >= questions.length) {
+        showResult();
+        return;
+      }
+      game.innerHTML = `
+        <div class="question">
+          <h2>Q${current + 1}. ${questions[current]}</h2>
+          <button onclick="answer(1)">はい</button>
+          <button onclick="answer(0.5)">どちらでもない</button>
+          <button onclick="answer(0)">いいえ</button>
+        </div>
+      `;
+    }
+
+    function answer(val) {
+      answers.push(val);
+      current++;
+      showQuestion();
+    }
+
+    function showResult() {
+      const result = schools.map(school => {
+        let score = 0;
+        school.tags.forEach(tag => {
+          score += answers[tag];
+        });
+        return {
+          name: school.name,
+          score,
+          max: school.tags.length,
+          偏差値: school.偏差値,
+          url: school.url,
+          features: school.features,
+          station: school.station,
+          walk: school.walk,
+          caution: school.caution
+        };
+      });
+
+      result.sort((a, b) => b.score - a.score);
+      const top = result.slice(0, 10);
+
+      game.innerHTML = `<h2>あなたにオススメの学校（上位10校）</h2>`;
+      game.innerHTML += `<table><tr><th>学校名</th><th>マッチ度</th><th>偏差値</th><th>最寄り駅</th><th>徒歩</th><th>特徴</th><th>留意点</th></tr>`;
+      top.forEach(row => {
+        const percent = Math.round((row.score / row.max) * 100);
+        game.innerHTML += `<tr><td><a href="${row.url}" target="_blank">${row.name}</a></td><td>${percent}%</td><td>${row.偏差値}</td><td>${row.station}</td><td>${row.walk}</td><td>${row.features}</td><td>${row.caution}</td></tr>`;
+      });
+      game.innerHTML += `</table><button onclick='restart()'>もう一度やる</button>`;
+    }
+
+    function restart() {
+      current = 0;
+      answers = [];
+      showQuestion();
+    }
+
+    showQuestion();
+  </script>
+</body>
+</html>
